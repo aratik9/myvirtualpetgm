@@ -5,8 +5,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brown Kitty Virtual Pet 3D</title>
+
 <style>
 *{box-sizing:border-box}
+
 body{
  margin:0;
  font-family:Arial,sans-serif;
@@ -14,60 +16,88 @@ body{
  color:#643b27;
  background:linear-gradient(#ffe2ed,#fff3d9);
 }
+
 header{
  background:#a75e35;
  color:white;
  padding:12px;
 }
+
 h1{margin:5px;font-size:25px}
+
 #stats{
- display:flex;justify-content:center;
- flex-wrap:wrap;gap:12px;
- padding:12px;font-weight:bold;
+ display:flex;
+ justify-content:center;
+ flex-wrap:wrap;
+ gap:12px;
+ padding:12px;
+ font-weight:bold;
 }
+
 .stat{
- background:white;padding:9px 13px;
+ background:white;
+ padding:9px 13px;
  border-radius:20px;
 }
+
 #game{
- height:390px;width:100%;
+ height:390px;
+ width:100%;
  position:relative;
  overflow:hidden;
  background:linear-gradient(#a9e5ff 0%,#e6faff 65%,#a4d989 65%);
 }
+
 canvas{display:block}
+
 #message{
  background:white;
  border-radius:20px;
  padding:13px;
  margin:12px auto;
- width:92%;max-width:500px;
+ width:92%;
+ max-width:500px;
  box-shadow:0 3px 10px #d9a9b9;
 }
+
 .buttons{
- display:flex;flex-wrap:wrap;
+ display:flex;
+ flex-wrap:wrap;
  justify-content:center;
- gap:10px;padding:10px;
+ gap:10px;
+ padding:10px;
 }
+
 button{
  border:0;
  padding:12px 16px;
  border-radius:18px;
  background:#b36b42;
- color:white;font-size:15px;
+ color:white;
+ font-size:15px;
  font-weight:bold;
  cursor:pointer;
  box-shadow:0 4px #814529;
 }
+
 button:active{
  transform:translateY(3px);
  box-shadow:none;
 }
-#mall{display:none;background:#ffe7f2;padding:15px}
-#bathroom{display:none}
-.small{font-size:13px;color:#805b4a}
+
+#mall{
+ display:none;
+ background:#ffe7f2;
+ padding:15px;
+}
+
+.small{
+ font-size:13px;
+ color:#805b4a;
+}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -84,14 +114,16 @@ button:active{
 
 <div id="game"></div>
 
-<div id="message">Hello! I am Brown Kitty! 🤎 Meow!</div>
+<div id="message">
+Hello! I am Brown Kitty! 🤎 Meow!
+</div>
 
 <div class="buttons">
 <button onclick="bath()">🛁 Take Bath</button>
 <button onclick="play()">🧶 Play</button>
 <button onclick="eat()">🍖 Eat Food</button>
 <button onclick="milk()">🥛 Drink Milk</button>
-<button onclick="dress()">👗 Dress Up</button>
+<button onclick="dressUp()">👗 Dress Up</button>
 <button onclick="sleep()">😴 Sleep</button>
 <button onclick="shopping()">🛍️ Shopping</button>
 <button onclick="goHome()">🏠 Home</button>
@@ -108,25 +140,35 @@ button:active{
 <p class="small">Brown Kitty 3D Virtual Pet Game</p>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
 <script>
+
 let scene,camera,renderer,clock;
-let cat,tail,dress,ball,bathtub,water;
+let cat,tail,outfitMesh,ball,bathtub,water;
+
 let bubbles=[];
-let happy=100,energy=100,coins=100,level=1;
+
+let happy=100;
+let energy=100;
+let coins=100;
+let level=1;
+
 let currentRoom='home';
+
 let isBathing=false;
 let isPlaying=false;
 let isSleeping=false;
+
 let actionUntil=0;
 let outfitColor=0xff75ae;
 let hasDress=false;
 let bathStart=0;
-let bathObjects=[];
-let lastAction='';
 
 const $=id=>document.getElementById(id);
 
-function message(t){$('message').textContent=t}
+function message(t){
+ $('message').textContent=t;
+}
 
 function update(){
  $('happy').textContent=happy;
@@ -136,7 +178,10 @@ function update(){
 }
 
 function mat(color,roughness=.8){
- return new THREE.MeshStandardMaterial({color,roughness});
+ return new THREE.MeshStandardMaterial({
+  color:color,
+  roughness:roughness
+ });
 }
 
 function sphere(parent,x,y,z,sx,sy,sz,color){
@@ -144,9 +189,11 @@ function sphere(parent,x,y,z,sx,sy,sz,color){
   new THREE.SphereGeometry(1,32,24),
   mat(color)
  );
+
  m.position.set(x,y,z);
  m.scale.set(sx,sy,sz);
  parent.add(m);
+
  return m;
 }
 
@@ -155,26 +202,19 @@ function box(parent,x,y,z,sx,sy,sz,color){
   new THREE.BoxGeometry(sx,sy,sz),
   mat(color)
  );
- m.position.set(x,y,z);
- parent.add(m);
- return m;
-}
 
-function cylinder(parent,x,y,z,r1,r2,h,color){
- let m=new THREE.Mesh(
-  new THREE.CylinderGeometry(r1,r2,h,32),
-  mat(color)
- );
  m.position.set(x,y,z);
  parent.add(m);
+
  return m;
 }
 
 function createCat(){
+
  cat=new THREE.Group();
  scene.add(cat);
 
- // Brown furry body
+ // Body
  sphere(cat,0,.85,0,.62,.7,.45,0x98552e);
 
  // Head
@@ -182,15 +222,19 @@ function createCat(){
 
  // Ears
  for(let x of [-.45,.45]){
-  let ear=sphere(cat,x,2.28,0,.21,.34,.15,0x98552e);
+  sphere(cat,x,2.28,0,.21,.34,.15,0x98552e);
   sphere(cat,x,2.3,.11,.11,.22,.04,0xffa2a7);
  }
 
- // Face
+ // Eyes
  sphere(cat,-.24,1.92,.5,.075,.105,.05,0x241b18);
  sphere(cat,.24,1.92,.5,.075,.105,.05,0x241b18);
+
+ // Eye shine
  sphere(cat,-.26,1.95,.545,.025,.03,.02,0xffffff);
  sphere(cat,.22,1.95,.545,.025,.03,.02,0xffffff);
+
+ // Nose
  sphere(cat,0,1.72,.56,.09,.06,.07,0xff8d99);
 
  // Muzzle
@@ -200,7 +244,14 @@ function createCat(){
  // Whiskers
  for(let side of [-1,1]){
   for(let i=0;i<3;i++){
-   let w=box(cat,side*.52,1.7-i*.07,.53,.30,.012,.012,0x5d3928);
+   let w=box(
+    cat,
+    side*.52,
+    1.7-i*.07,
+    .53,
+    .30,.012,.012,
+    0x5d3928
+   );
    w.rotation.z=side*.1;
   }
  }
@@ -214,35 +265,38 @@ function createCat(){
  tail=sphere(cat,0,.95,-.53,.13,.14,.52,0x98552e);
  tail.rotation.x=1.2;
 
- // Clothes
- dress=sphere(cat,0,.85,.02,.64,.49,.46,outfitColor);
- dress.visible=false;
+ // Dress
+ outfitMesh=sphere(
+  cat,0,.85,.02,
+  .64,.49,.46,
+  outfitColor
+ );
 
- // Bow
+ outfitMesh.visible=false;
+
+ // Pink bow
  sphere(cat,0,2.35,.08,.13,.08,.09,0xff75ae);
-
- cat.userData.legs=[];
- for(let x of [-.38,.38]){
-  let leg=sphere(cat,x,.27,.05,.17,.35,.19,0x98552e);
-  cat.userData.legs.push(leg);
- }
 }
 
 function floor(color){
+
  let f=new THREE.Mesh(
   new THREE.PlaneGeometry(30,30),
   mat(color)
  );
+
  f.rotation.x=-Math.PI/2;
  f.position.y=-.12;
+
  scene.add(f);
 }
 
 function decoration(){
+
  if(currentRoom==='home'){
+
   floor(0x9bdc86);
 
-  // House
   box(scene,0,1.7,-4,9,3.5,.3,0xffd7b8);
   box(scene,0,3.5,-4,9,.2,.3,0xffa4a4);
 
@@ -254,28 +308,38 @@ function decoration(){
   box(scene,-2,.85,-1.8,1.8,.4,.3,0xffb8cc);
 
   // Carpet
-  let carpet=sphere(scene,0,.015,0,2.6,.02,1.4,0xffe3a5);
+  sphere(scene,0,.015,0,2.6,.02,1.4,0xffe3a5);
+
  }else if(currentRoom==='bath'){
+
   floor(0x9edff5);
 
   box(scene,0,1.6,-4,9,3.2,.3,0xc4f3ff);
 
-  // Bath tub
   bathtub=new THREE.Group();
   scene.add(bathtub);
 
-  let tub=box(bathtub,0,.3,0,2.8,.6,1.8,0xffffff);
+  box(bathtub,0,.3,0,2.8,.6,1.8,0xffffff);
   box(bathtub,0,.55,.75,2.8,.3,.3,0xe4faff);
   box(bathtub,0,.55,-.75,2.8,.3,.3,0xe4faff);
   box(bathtub,-1.25,.55,0,.3,.3,1.5,0xe4faff);
   box(bathtub,1.25,.55,0,.3,.3,1.5,0xe4faff);
 
-  water=sphere(bathtub,0,.53,0,1.2,.12,.65,0x52cbed);
+  water=sphere(
+   bathtub,0,.53,0,
+   1.2,.12,.65,
+   0x52cbed
+  );
+
   water.material.transparent=true;
   water.material.opacity=.7;
+
  }else{
+
   floor(0xf7c2df);
+
   box(scene,0,1.6,-4,9,3.2,.3,0xffe5f3);
+
   for(let i=-2;i<=2;i++){
    box(scene,i*1.3,.8,-2,.8,1.5,.4,0xffd66c);
   }
@@ -283,237 +347,278 @@ function decoration(){
 }
 
 function clearRoom(){
+
  let remove=[];
+
  scene.children.forEach(o=>{
-  if(o!==cat && !(o instanceof THREE.Light)) remove.push(o);
+  if(o!==cat && !(o instanceof THREE.Light)){
+   remove.push(o);
+  }
  });
+
  remove.forEach(o=>scene.remove(o));
+
 }
 
 function changeRoom(room){
+
  currentRoom=room;
+
  clearRoom();
  decoration();
+
  cat.position.set(0,0,0);
  cat.rotation.set(0,0,0);
  cat.visible=true;
 }
 
-function init(){
- scene=new THREE.Scene();
- scene.background=new THREE.Color(0x9bdfff);
-
- camera=new THREE.PerspectiveCamera(
-  45,window.innerWidth/390,.1,100
- );
- camera.position.set(0,3.3,8);
- camera.lookAt(0,1,0);
-
- renderer=new THREE.WebGLRenderer({antialias:true});
- renderer.setSize(window.innerWidth,390);
- renderer.setPixelRatio(Math.min(devicePixelRatio,2));
- renderer.shadowMap.enabled=true;
- $('game').appendChild(renderer.domElement);
-
- scene.add(new THREE.HemisphereLight(0xffffff,0x8b6b55,2));
-
- let light=new THREE.DirectionalLight(0xffffff,2.5);
- light.position.set(3,7,5);
- scene.add(light);
-
- clock=new THREE.Clock();
-
- decoration();
- createCat();
- createBall();
-
- window.addEventListener('resize',()=>{
-  camera.aspect=window.innerWidth/390;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth,390);
- });
-
- animate();
-}
-
 function createBall(){
- ball=sphere(scene,2,.2,0,.22,.22,.22,0xff4c90);
+
+ ball=sphere(
+  scene,2,.2,0,
+  .22,.22,.22,
+  0xff4c90
+ );
 }
 
 function createBubble(){
- let b=sphere(scene,
+
+ let b=sphere(
+  scene,
   (Math.random()-.5)*1.6,
   .8+Math.random()*1.1,
   (Math.random()-.5)*.8,
-  .08,.08,.08,0xffffff
+  .08,.08,.08,
+  0xffffff
  );
+
  b.material.transparent=true;
  b.material.opacity=.8;
+
  bubbles.push(b);
 }
 
 function bath(){
+
  changeRoom('bath');
+
  isBathing=true;
  isPlaying=false;
  isSleeping=false;
- bathStart=clock.getElapsedTime();
- bubbles=[];
- bathObjects=[];
 
- dress.visible=false;
+ bathStart=clock.getElapsedTime();
+
+ bubbles=[];
+
+ outfitMesh.visible=false;
 
  cat.position.set(0,.35,0);
  cat.scale.set(.85,.8,.85);
 
- // Kitty enters bath
- for(let i=0;i<15;i++)createBubble();
+ for(let i=0;i<15;i++){
+  createBubble();
+ }
 
  message('🛁 Kitty is taking a full bubble bath! Splash splash! 🤎');
+
  happy=Math.min(100,happy+15);
  update();
 }
 
 function play(){
+
  changeRoom('home');
+
  isBathing=false;
  isPlaying=true;
  isSleeping=false;
+
  actionUntil=clock.getElapsedTime()+10;
+
  ball.visible=true;
+
  message('🧶 Kitty is playing with her favourite ball!');
+
  happy=Math.min(100,happy+20);
  energy=Math.max(0,energy-5);
+
  update();
 }
 
 function eat(){
+
  message('🍖 Yum yum! Brown Kitty is eating delicious food!');
+
  happy=Math.min(100,happy+5);
  energy=Math.min(100,energy+20);
+
  update();
 }
 
 function milk(){
+
  message('🥛 Kitty is drinking a big bowl of milk! Meow!');
+
  energy=Math.min(100,energy+15);
  happy=Math.min(100,happy+10);
+
  update();
 }
 
 function dressUp(){
- dress.visible=true;
- dress.material.color.setHex(outfitColor);
+
+ outfitMesh.visible=true;
+
+ outfitMesh.material.color.setHex(outfitColor);
+
  hasDress=true;
+
  message('👗 Brown Kitty looks so beautiful!');
+
  happy=Math.min(100,happy+10);
+
  update();
 }
 
-function dress(){
- dressUp();
-}
-
 function sleep(){
+
  isBathing=false;
  isPlaying=false;
  isSleeping=true;
+
  message('😴 Kitty is sleeping... Sweet dreams!');
+
  energy=Math.min(100,energy+25);
+
  update();
 }
 
 function shopping(){
+
  isBathing=false;
  isPlaying=false;
  isSleeping=false;
+
  level=2;
  update();
+
  changeRoom('mall');
+
  $('mall').style.display='block';
+
  message('🛍️ Welcome to the Kitty Fashion Mall!');
 }
 
 function goHome(){
+
  $('mall').style.display='none';
+
  level=1;
+
  isBathing=false;
  isPlaying=false;
  isSleeping=false;
+
  cat.scale.set(1,1,1);
+
  changeRoom('home');
+
  update();
+
  message('🏠 Welcome home! Meow!');
 }
 
 function buy(color,cost){
+
  if(coins<cost){
+
   message('😿 Not enough coins!');
+
   return;
  }
+
  coins-=cost;
  outfitColor=color;
+
  dressUp();
+
  update();
+
  message('🎁 New dress purchased! Kitty is happy!');
 }
 
 function animate(){
+
  requestAnimationFrame(animate);
 
  let t=clock.getElapsedTime();
 
  if(cat){
+
   if(isBathing){
+
    let elapsed=t-bathStart;
 
-   // Bathing and splashing movement
    cat.position.y=.35+Math.sin(t*5)*.06;
+
    cat.rotation.x=Math.sin(t*3)*.12;
    cat.rotation.z=Math.sin(t*4)*.08;
 
-   bubbles.forEach((b,i)=>{
+   bubbles.forEach(b=>{
     b.position.y+=.008;
-    if(b.position.y>2.5)b.position.y=.65;
+
+    if(b.position.y>2.5){
+     b.position.y=.65;
+    }
    });
 
-   if(Math.floor(elapsed)%2===0 && elapsed<12){
-    // Bubble animation
-   }
-
    if(elapsed>12){
+
     isBathing=false;
+
     cat.scale.set(1,1,1);
     cat.rotation.set(0,0,0);
+
     bubbles.forEach(b=>scene.remove(b));
+
     bubbles=[];
+
     changeRoom('home');
+
     message('🤎 Kitty finished her bath! So clean and cute!');
    }
-  }
-  else if(isPlaying){
+
+  }else if(isPlaying){
+
    cat.position.x=Math.sin(t*2.5)*1.5;
    cat.position.y=Math.abs(Math.sin(t*5))*.35;
+
    cat.rotation.y=Math.cos(t*2.5)*.6;
 
    ball.position.x=Math.cos(t*2.5)*1.5;
    ball.position.y=.2+Math.abs(Math.sin(t*5))*.4;
 
    if(t>actionUntil){
+
     isPlaying=false;
+
     cat.position.set(0,0,0);
+
     ball.position.set(2,.2,0);
+
     message('😻 Kitty had so much fun playing!');
    }
-  }
-  else if(isSleeping){
+
+  }else if(isSleeping){
+
    cat.position.y=-.1;
    cat.rotation.z=.25;
-  }
-  else{
-   // Automatic walking and jumping
+
+  }else{
+
    cat.position.x=Math.sin(t*.8)*1.3;
    cat.position.y=Math.abs(Math.sin(t*2.5))*.13;
+
    cat.rotation.y=Math.cos(t*.8)*.3;
    cat.rotation.z=0;
   }
@@ -522,16 +627,96 @@ function animate(){
    tail.rotation.x=1.2+Math.sin(t*4)*.4;
   }
 
-  if(dress.visible){
-   dress.position.set(cat.position.x,cat.position.y+.85,.02);
+  if(outfitMesh.visible){
+   outfitMesh.position.set(
+    cat.position.x,
+    cat.position.y+.85,
+    .02
+   );
   }
  }
 
  renderer.render(scene,camera);
 }
 
+function init(){
+
+ scene=new THREE.Scene();
+
+ scene.background=new THREE.Color(0x9bdfff);
+
+ camera=new THREE.PerspectiveCamera(
+  45,
+  window.innerWidth/390,
+  .1,
+  100
+ );
+
+ camera.position.set(0,3.3,8);
+ camera.lookAt(0,1,0);
+
+ renderer=new THREE.WebGLRenderer({
+  antialias:true
+ });
+
+ renderer.setSize(
+  window.innerWidth,
+  390
+ );
+
+ renderer.setPixelRatio(
+  Math.min(window.devicePixelRatio,2)
+ );
+
+ renderer.shadowMap.enabled=true;
+
+ $('game').appendChild(renderer.domElement);
+
+ scene.add(
+  new THREE.HemisphereLight(
+   0xffffff,
+   0x8b6b55,
+   2
+  )
+ );
+
+ let light=new THREE.DirectionalLight(
+  0xffffff,
+  2.5
+ );
+
+ light.position.set(3,7,5);
+
+ scene.add(light);
+
+ clock=new THREE.Clock();
+
+ decoration();
+
+ createCat();
+
+ createBall();
+
+ window.addEventListener('resize',()=>{
+
+  camera.aspect=window.innerWidth/390;
+
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(
+   window.innerWidth,
+   390
+  );
+
+ });
+
+ animate();
+}
+
 init();
 update();
+
 </script>
+
 </body>
 </html>
