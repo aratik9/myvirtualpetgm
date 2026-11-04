@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Virtual Pet - Puppy World</title>
+ 
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+ 
+body {
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    background: linear-gradient(135deg,#ffe0ef,#dcd7ff,#d5f5ff);
+    min-height: 100vh;
+    color: #51415e;
+    padding: 20px;
+}
+ 
+.game {
+    max-width: 950px;
+    margin: auto;
+    background: rgba(255,255,255,0.88);
+    border-radius: 30px;
+    padding: 25px;
+    box-shadow: 0 15px 45px #a68ebd55;
+}
+ 
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+ 
+h1 {
+    color: #9c65c7;
+    font-size: 27px;
+}
+ 
+.coins {
+    background: #fff0b8;
+    padding: 12px 18px;
+    border-radius: 25px;
+    font-weight: bold;
+}
+ 
+.level {
+    text-align: center;
+    margin: 20px 0;
+    color: #9b69bd;
+    font-weight: bold;
+}
+ 
+.scene {
+    position: relative;
+    min-height: 350px;
+    border-radius: 25px;
+    overflow: hidden;
+    background: linear-gradient(#aee9ff 0%,#e1f8ff 65%,#91dca1 65%,#65c987 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+ 
+.sun {
+    position: absolute;
+    top: 25px;
+    right: 35px;
+    width: 65px;
+    height: 65px;
+    background: #ffe58a;
+    border-radius: 50%;
+    box-shadow: 0 0 35px #ffe58a;
+}
+ 
+.cloud {
+    position: absolute;
+    top: 65px;
+    left: 40px;
+    font-size: 45px;
+}
+ 
+.pet {
+    position: relative;
+    z-index: 2;
+    font-size: 125px;
+    filter: drop-shadow(0 12px 8px #426b5444);
+    animation: bounce 2s infinite ease-in-out;
+    cursor: pointer;
+    user-select: none;
+}
+ 
+@keyframes bounce {
+    0%,100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-13px) rotate(3deg); }
+}
+ 
+.pet.sleeping {
+    animation: sleep 2s infinite ease-in-out;
+}
+ 
+@keyframes sleep {
+    50% { transform: translateY(5px) rotate(8deg); }
+}
+ 
+.pet-name {
+    font-size: 25px;
+    font-weight: bold;
+    color: #754d94;
+    margin-top: 5px;
+}
+ 
+.message {
+    margin-top: 10px;
+    background: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 2;
+}
+ 
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 12px;
+    margin: 25px 0;
+}
+ 
+.stat {
+    background: #faf4ff;
+    border-radius: 17px;
+    padding: 13px;
+    text-align: center;
+}
+ 
+.stat-label {
+    font-size: 13px;
+    margin-bottom: 9px;
+    font-weight: bold;
+}
+ 
+.bar {
+    height: 12px;
+    background: #e5dce9;
+    border-radius: 20px;
+    overflow: hidden;
+}
+ 
+.fill {
+    height: 100%;
+    width: 80%;
+    border-radius: 20px;
+    transition: width .4s;
+    background: linear-gradient(90deg,#ff9bc5,#bc8cf2);
+}
+ 
+.stat-value {
+    font-size: 12px;
+    margin-top: 6px;
+}
+ 
+h2 {
+    text-align: center;
+    color: #9864c0;
+    margin: 20px 0 15px;
+}
+ 
+.actions {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 12px;
+}
+ 
+.action {
+    border: none;
+    border-radius: 18px;
+    padding: 16px 5px;
+    background: linear-gradient(135deg,#f9d5ed,#e7dcff);
+    color: #694b80;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: .2s;
+}
+ 
+.action:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 7px 15px #a88abb55;
+}
+ 
+.action span {
+    display: block;
+    font-size: 30px;
+    margin-bottom: 7px;
+}
+ 
+.name-area {
+    text-align: center;
+    margin-top: 25px;
+}
+ 
+input {
+    padding: 12px;
+    border: 2px solid #e4c9f2;
+    border-radius: 12px;
+    width: 65%;
+    max-width: 250px;
+    outline: none;
+    font-size: 15px;
+}
+ 
+.rename {
+    padding: 12px 16px;
+    background: #a978ce;
+    border: none;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+}
+ 
+.footer {
+    text-align: center;
+    margin-top: 25px;
+    color: #a28cae;
+    font-size: 12px;
+}
+ 
+@media(max-width:600px) {
+    body { padding: 10px; }
+    .game { padding: 15px; }
+    .stats { grid-template-columns: repeat(2,1fr); }
+    .actions { grid-template-columns: repeat(2,1fr); }
+    .scene { min-height: 300px; }
+    .pet { font-size: 105px; }
+    h1 { font-size: 21px; }
+}
+</style>
+</head>
+ 
+<body>
+ 
+<div class="game">
+ 
+<header>
+    <h1>🐾 My Virtual Pet</h1>
+    <div class="coins">🪙 Coins: <span id="coins">50</span></div>
+</header>
+ 
+<div class="level">
+    ⭐ Level <span id="level">1</span>
+    &nbsp; | &nbsp;
+    XP: <span id="xp">0</span>/100
+</div>
+ 
+<div class="scene">
+    <div class="sun"></div>
+    <div class="cloud">☁️</div>
+ 
+    <div class="pet" id="pet" onclick="petClick()">🐶</div>
+ 
+    <div class="pet-name" id="petName">Buddy</div>
+    <div class="message" id="message">
+        Woof! Hello best friend! ❤️
+    </div>
+</div>
+ 
+<div class="stats">
+ 
+    <div class="stat">
+        <div class="stat-label">🍖 Hunger</div>
+        <div class="bar"><div class="fill" id="hungerBar"></div></div>
+        <div class="stat-value" id="hungerValue">80%</div>
+    </div>
+ 
+    <div class="stat">
+        <div class="stat-label">❤️ Happiness</div>
+        <div class="bar"><div class="fill" id="happyBar"></div></div>
+        <div class="stat-value" id="happyValue">80%</div>
+    </div>
+ 
+    <div class="stat">
+        <div class="stat-label">⚡ Energy</div>
+        <div class="bar"><div class="fill" id="energyBar"></div></div>
+        <div class="stat-value" id="energyValue">80%</div>
+    </div>
+ 
+    <div class="stat">
+        <div class="stat-label">🛁 Cleanliness</div>
+        <div class="bar"><div class="fill" id="cleanBar"></div></div>
+        <div class="stat-value" id="cleanValue">80%</div>
+    </div>
+ 
+</div>
+ 
+<h2>🎮 Take Care of Your Puppy!</h2>
+ 
+<div class="actions">
+ 
+    <button class="action" onclick="feed()">
+        <span>🍖</span>Feed
+    </button>
+ 
+    <button class="action" onclick="bath()">
+        <span>🛁</span>Bath
+    </button>
+ 
+    <button class="action" onclick="play()">
+        <span>🎾</span>Play
+    </button>
+ 
+    <button class="action" onclick="sleep()">
+        <span>😴</span>Sleep
+    </button>
+ 
+</div>
+ 
+<div class="name-area">
+    <h2>✨ Give Your Puppy a Name</h2>
+    <input id="nameInput" placeholder="Enter puppy name">
+    <button class="rename" onclick="changeName()">Save Name</button>
+</div>
+ 
+<div class="footer">
+    Made with ❤️ for your little puppy | Puppy World
+</div>
+ 
+</div>
+ 
+<script>
+ 
+let hunger = 80;
+let happiness = 80;
+let energy = 80;
+let cleanliness = 80;
+ 
+let coins = 50;
+let xp = 0;
+let level = 1;
+ 
+let isSleeping = false;
+ 
+function updateGame() {
+ 
+    let stats = [
+        ["hunger", hunger],
+        ["happy", happiness],
+        ["energy", energy],
+        ["clean", cleanliness]
+    ];
+ 
+    stats.forEach(([name,value]) => {
+        document.getElementById(name+"Bar").style.width = value+"%";
+        document.getElementById(name+"Value").innerText = value+"%";
+    });
+ 
+    document.getElementById("coins").innerText = coins;
+    document.getElementById("xp").innerText = xp;
+    document.getElementById("level").innerText = level;
+}
+ 
+function message(text) {
+    document.getElementById("message").innerText = text;
+}
+ 
+function reward(points) {
+    xp += points;
+ 
+    if(xp >= 100) {
+        xp -= 100;
+        level++;
+        coins += 30;
+        message("🎉 Level Up! You are amazing!");
+    }
+ 
+    updateGame();
+}
+ 
+function feed() {
+ 
+    if(coins < 10) {
+        message("Oh no! Need more coins! 🪙");
+        return;
+    }
+ 
+    coins -= 10;
+    hunger = Math.min(100,hunger+25);
+    happiness = Math.min(100,happiness+5);
+ 
+    message("Yummy! Thank you! 🍖");
+    reward(15);
+}
+ 
+function bath() {
+ 
+    if(coins < 5) {
+        message("Need 5 coins for a bath!");
+        return;
+    }
+ 
+    coins -= 5;
+    cleanliness = Math.min(100,cleanliness+35);
+    happiness = Math.min(100,happiness+5);
+ 
+    message("I am so fresh and clean! 🛁");
+    reward(10);
+}
+ 
+function play() {
+ 
+    if(energy < 15) {
+        message("I am tired! Let me sleep. 😴");
+        return;
+    }
+ 
+    happiness = Math.min(100,happiness+25);
+    energy = Math.max(0,energy-15);
+    hunger = Math.max(0,hunger-5);
+    coins += 5;
+ 
+    message("Yay! That was so much fun! 🎾");
+    reward(20);
+}
+ 
+function sleep() {
+ 
+    isSleeping = !isSleeping;
+ 
+    let pet = document.getElementById("pet");
+ 
+    if(isSleeping) {
+        pet.classList.add("sleeping");
+        pet.innerText = "😴";
+        message("Zzz... Sweet dreams! 🌙");
+    } else {
+        pet.classList.remove("sleeping");
+        pet.innerText = "🐶";
+        message("Good morning! Woof! ☀️");
+    }
+}
+ 
+function petClick() {
+ 
+    happiness = Math.min(100,happiness+5);
+    message("Woof! I love you! ❤️");
+    updateGame();
+}
+ 
+function changeName() {
+ 
+    let name = document.getElementById("nameInput").value.trim();
+ 
+    if(name.length > 0) {
+        document.getElementById("petName").innerText = name;
+        message("Thank you for naming me! 🥰");
+        document.getElementById("nameInput").value = "";
+    } else {
+        message("Please enter a name!");
+    }
+}
+ 
+// Pet needs care as time passes
+ 
+setInterval(function() {
+ 
+    if(!isSleeping) {
+        hunger = Math.max(0,hunger-1);
+        happiness = Math.max(0,happiness-1);
+        energy = Math.max(0,energy-1);
+        cleanliness = Math.max(0,cleanliness-1);
+    } else {
+        energy = Math.min(100,energy+5);
+        hunger = Math.max(0,hunger-1);
+    }
+ 
+    updateGame();
+ 
+    if(hunger < 20) {
+        message("I am hungry! Please feed me! 🥺");
+    } else if(energy < 20) {
+        message("I am sleepy! 😴");
+    }
+ 
+},5000);
+ 
+updateGame();
+ 
+</script>
+ 
+</body>
+</html>
+has context menu
