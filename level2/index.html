@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Virtual Pet Cat 3D</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;font-family:Arial,sans-serif;
+ background:linear-gradient(#a9e8ff,#fff0d9);
+ text-align:center;color:#633d50;
+}
+header{padding:12px;background:#ff91b5;color:white}
+h1{margin:5px}
+#stats{padding:10px;font-weight:bold}
+#game{
+ width:100%;height:420px;
+ position:relative;overflow:hidden;
+ background:linear-gradient(#8cdbff 0 65%,#a6e6a0 65%);
+}
+canvas{display:block}
+#controls{
+ padding:12px;display:flex;flex-wrap:wrap;
+ justify-content:center;gap:9px;
+}
+button{
+ border:0;border-radius:18px;
+ background:#ff77a8;color:white;
+ padding:12px 17px;font-size:15px;
+ font-weight:bold;cursor:pointer;
+ box-shadow:0 4px #d94c82;
+}
+button:active{transform:translateY(3px);box-shadow:none}
+#message{
+ background:white;border-radius:20px;
+ margin:10px auto;padding:12px;
+ width:90%;max-width:450px;
+}
+#shop{display:none;background:#fff0f7;padding:15px}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🐱 My Virtual Pet Cat 3D</h1>
+<p>Take care of your cute little kitty!</p>
+</header>
+
+<div id="stats">
+❤️ Happiness: <span id="happy">100</span>
+ | 🥛 Energy: <span id="energy">100</span>
+ | 🪙 Coins: <span id="coins">100</span>
+</div>
+
+<div id="game"></div>
+
+<div id="message">Hello! I am your cute kitty! 🐱</div>
+
+<div id="controls">
+<button onclick="bath()">🛁 Bath</button>
+<button onclick="dress()">👗 Dress</button>
+<button onclick="eat()">🍖 Eat Food</button>
+<button onclick="milk()">🥛 Drink Milk</button>
+<button onclick="shopping()">🛍️ Shopping</button>
+<button onclick="goHome()">🏠 Home</button>
+</div>
+
+<div id="shop">
+<h2>🛍️ Kitty Shopping Mall</h2>
+<p>Choose beautiful clothes for your kitty!</p>
+<button onclick="buy('pink')">💗 Pink Dress - 20</button>
+<button onclick="buy('blue')">💙 Blue Dress - 30</button>
+<button onclick="buy('yellow')">💛 Yellow Dress - 40</button>
+<button onclick="goHome()">🏠 Go Home</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+let happy=100,energy=100,coins=100;
+let level=1, outfit=0, currentRoom='home';
+let cat,tail,arms=[];
+let scene,camera,renderer;
+let clock=new THREE.Clock();
+
+const colors={
+ pink:0xff75ae,
+ blue:0x5d9dff,
+ yellow:0xffd65a
+};
+
+function update(){
+ document.getElementById('happy').textContent=happy;
+ document.getElementById('energy').textContent=energy;
+ document.getElementById('coins').textContent=coins;
+}
+
+function say(t){
+ document.getElementById('message').textContent=t;
+}
+
+function sphere(parent,x,y,z,sx,sy,sz,color){
+ let m=new THREE.Mesh(
+ new THREE.SphereGeometry(1,32,24),
+ new THREE.MeshStandardMaterial({color,roughness:.75})
+ );
+ m.position.set(x,y,z);
+ m.scale.set(sx,sy,sz);
+ parent.add(m);
+ return m;
+}
+
+function cylinder(parent,x,y,z,r1,r2,h,color){
+ let m=new THREE.Mesh(
+ new THREE.CylinderGeometry(r1,r2,h,24),
+ new THREE.MeshStandardMaterial({color})
+ );
+ m.position.set(x,y,z);
+ parent.add(m);
+ return m;
+}
+
+function createCat(){
+ cat=new THREE.Group();
+ scene.add(cat);
+
+ // Body
+ sphere(cat,0,0.85,0,.66,.72,.46,0xffe4d5);
+
+ // Head
+ sphere(cat,0,1.8,0,.67,.62,.57,0xffe4d5);
+
+ // Ears
+ let e1=sphere(cat,-.43,2.28,0,.20,.34,.15,0xffc3d2);
+ let e2=sphere(cat,.43,2.28,0,.20,.34,.15,0xffc3d2);
+ e1.rotation.z=.3;e2.rotation.z=-.3;
+
+ // Inner ears
+ sphere(cat,-.43,2.3,.11,.11,.22,.04,0xff759d);
+ sphere(cat,.43,2.3,.11,.11,.22,.04,0xff759d);
+
+ // Eyes
+ sphere(cat,-.24,1.91,.49,.075,.11,.055,0x34243d);
+ sphere(cat,.24,1.91,.49,.075,.11,.055,0x34243d);
+
+ // Nose
+ sphere(cat,0,1.72,.54,.09,.06,.07,0xff789a);
+
+ // Cheeks
+ sphere(cat,-.40,1.73,.48,.14,.09,.05,0xffb7bd);
+ sphere(cat,.40,1.73,.48,.14,.09,.05,0xffb7bd);
+
+ // Mouth
+ let mouth=new THREE.Mesh(
+ new THREE.TorusGeometry(.10,.018,8,20,Math.PI),
+ new THREE.MeshStandardMaterial({color:0x633d50})
+ );
+ mouth.position.set(0,1.64,.55);
+ mouth.rotation.z=Math.PI;
+ cat.add(mouth);
+
+ // Legs
+ for(let x of [-.4,.4]){
+  sphere(cat,x,.25,0,.17,.36,.18,0xffe4d5);
+ }
+
+ // Tail
+ tail=sphere(cat,0,.9,-.57,.13,.13,.48,0xffd4c4);
+ tail.rotation.x=1.2;
+
+ // Dress
+ let dress=sphere(cat,0,.85,.03,.68,.52,.48,0xff75ae);
+ dress.name='dress';
+
+ // Dress initially hidden
+ dress.visible=false;
+ cat.userData.dress=dress;
+
+ // Whiskers
+ for(let side of [-1,1]){
+  for(let i=0;i<2;i++){
+   let line=new THREE.Mesh(
+    new THREE.BoxGeometry(.32,.012,.012),
+    new THREE.MeshStandardMaterial({color:0x777777})
+   );
+   line.position.set(side*.52,1.72-i*.08,.5);
+   line.rotation.z=side*.15;
+   cat.add(line);
+  }
+ }
+}
+
+function makeRoom(){
+ scene.background=new THREE.Color(
+ currentRoom==='home'?0x9bdfff:0xffc4e1
+ );
+
+ let floor=sphere(scene,0,-100,0,1,1,1,0xffffff);
+ floor.visible=false;
+
+ let ground=new THREE.Mesh(
+ new THREE.PlaneGeometry(30,30),
+ new THREE.MeshStandardMaterial({
+  color:currentRoom==='home'?0x9ce6a0:0xf7a8cf
+ })
+ );
+ ground.rotation.x=-Math.PI/2;
+ ground.position.y=-.15;
+ scene.add(ground);
+
+ // Home furniture or mall decorations
+ if(currentRoom==='home'){
+  let table=sphere(scene,-3,.1,-2,1.2,.12,.7,0xffb77c);
+  let sofa=sphere(scene,3,.4,-2,1.2,.55,.6,0xff8da9);
+ }else{
+  for(let i=-2;i<=2;i++){
+   let shelf=sphere(scene,i*1.5,.8,-3,.55,.9,.3,0xffd65a);
+  }
+ }
+}
+
+function init(){
+ scene=new THREE.Scene();
+ camera=new THREE.PerspectiveCamera(45,
+ window.innerWidth/420,.1,100);
+ camera.position.set(0,3.2,7);
+ camera.lookAt(0,1.1,0);
+
+ renderer=new THREE.WebGLRenderer({antialias:true});
+ renderer.setSize(window.innerWidth,420);
+ renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+ document.getElementById('game').appendChild(renderer.domElement);
+
+ scene.add(new THREE.HemisphereLight(0xffffff,0x777777,2));
+ let light=new THREE.DirectionalLight(0xffffff,2);
+ light.position.set(3,6,5);
+ scene.add(light);
+
+ makeRoom();
+ createCat();
+
+ window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/420;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,420);
+ });
+
+ animate();
+}
+
+function animate(){
+ requestAnimationFrame(animate);
+ let t=clock.getElapsedTime();
+
+ if(cat){
+  cat.position.y=Math.sin(t*2)*.04;
+  cat.rotation.y=Math.sin(t*.7)*.12;
+  tail.rotation.x=1.2+Math.sin(t*3)*.3;
+  cat.scale.y=1+Math.sin(t*3)*.015;
+ }
+ renderer.render(scene,camera);
+}
+
+function bath(){
+ say('🛁 Kitty is taking a lovely bath! Splash splash!');
+ happy=Math.min(100,happy+10);
+ energy=Math.max(0,energy-5);
+ update();
+}
+
+function dress(){
+ if(outfit===0){
+  outfit=1;
+  cat.userData.dress.visible=true;
+  cat.userData.dress.material.color.setHex(0xff75ae);
+ }else{
+  outfit=0;
+  cat.userData.dress.visible=false;
+ }
+ say('👗 Your kitty looks so cute in her outfit!');
+ happy=Math.min(100,happy+15);
+ update();
+}
+
+function eat(){
+ say('🍖 Yum yum! Kitty is eating delicious food!');
+ energy=Math.min(100,energy+20);
+ happy=Math.min(100,happy+5);
+ update();
+}
+
+function milk(){
+ say('🥛 Kitty is drinking fresh milk. Meow!');
+ energy=Math.min(100,energy+15);
+ happy=Math.min(100,happy+10);
+ update();
+}
+
+function shopping(){
+ currentRoom='mall';
+ level=2;
+ document.getElementById('shop').style.display='block';
+ say('🛍️ Welcome to Kitty Shopping Mall! Choose a dress!');
+ changeRoom();
+}
+
+function goHome(){
+ currentRoom='home';
+ level=1;
+ document.getElementById('shop').style.display='none';
+ say('🏠 Welcome home, kitty!');
+ changeRoom();
+}
+
+function changeRoom(){
+ // Remove old room objects but keep lights and cat
+ let remove=[];
+ scene.children.forEach(o=>{
+  if(o!==cat && !(o instanceof THREE.Light)) remove.push(o);
+ });
+ remove.forEach(o=>scene.remove(o));
+ makeRoom();
+ scene.background.set(currentRoom==='home'?0x9bdfff:0xffc4e1);
+ cat.position.set(0,0,0);
+}
+
+function buy(type){
+ let cost=type==='pink'?20:type==='blue'?30:40;
+ if(coins<cost){
+  say('😿 Not enough coins! Play and earn more coins.');
+  return;
+ }
+ coins-=cost;
+ outfit=1;
+ cat.userData.dress.visible=true;
+ cat.userData.dress.material.color.setHex(colors[type]);
+ happy=Math.min(100,happy+20);
+ say('🎉 New dress purchased! Kitty looks beautiful!');
+ update();
+}
+
+init();
+update();
+</script>
+</body>
+</html>
