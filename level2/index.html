@@ -4,106 +4,145 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Virtual Pet Cat 3D</title>
+<title>Brown Kitty Virtual Pet 3D</title>
 <style>
 *{box-sizing:border-box}
 body{
- margin:0;font-family:Arial,sans-serif;
- background:linear-gradient(#a9e8ff,#fff0d9);
- text-align:center;color:#633d50;
+ margin:0;
+ font-family:Arial,sans-serif;
+ text-align:center;
+ color:#643b27;
+ background:linear-gradient(#ffe2ed,#fff3d9);
 }
-header{padding:12px;background:#ff91b5;color:white}
-h1{margin:5px}
-#stats{padding:10px;font-weight:bold}
+header{
+ background:#a75e35;
+ color:white;
+ padding:12px;
+}
+h1{margin:5px;font-size:25px}
+#stats{
+ display:flex;justify-content:center;
+ flex-wrap:wrap;gap:12px;
+ padding:12px;font-weight:bold;
+}
+.stat{
+ background:white;padding:9px 13px;
+ border-radius:20px;
+}
 #game{
- width:100%;height:420px;
- position:relative;overflow:hidden;
- background:linear-gradient(#8cdbff 0 65%,#a6e6a0 65%);
+ height:390px;width:100%;
+ position:relative;
+ overflow:hidden;
+ background:linear-gradient(#a9e5ff 0%,#e6faff 65%,#a4d989 65%);
 }
 canvas{display:block}
-#controls{
- padding:12px;display:flex;flex-wrap:wrap;
- justify-content:center;gap:9px;
+#message{
+ background:white;
+ border-radius:20px;
+ padding:13px;
+ margin:12px auto;
+ width:92%;max-width:500px;
+ box-shadow:0 3px 10px #d9a9b9;
+}
+.buttons{
+ display:flex;flex-wrap:wrap;
+ justify-content:center;
+ gap:10px;padding:10px;
 }
 button{
- border:0;border-radius:18px;
- background:#ff77a8;color:white;
- padding:12px 17px;font-size:15px;
- font-weight:bold;cursor:pointer;
- box-shadow:0 4px #d94c82;
+ border:0;
+ padding:12px 16px;
+ border-radius:18px;
+ background:#b36b42;
+ color:white;font-size:15px;
+ font-weight:bold;
+ cursor:pointer;
+ box-shadow:0 4px #814529;
 }
-button:active{transform:translateY(3px);box-shadow:none}
-#message{
- background:white;border-radius:20px;
- margin:10px auto;padding:12px;
- width:90%;max-width:450px;
+button:active{
+ transform:translateY(3px);
+ box-shadow:none;
 }
-#shop{display:none;background:#fff0f7;padding:15px}
+#mall{display:none;background:#ffe7f2;padding:15px}
+#bathroom{display:none}
+.small{font-size:13px;color:#805b4a}
 </style>
 </head>
 <body>
 
 <header>
-<h1>🐱 My Virtual Pet Cat 3D</h1>
+<h1>🤎 My Brown Kitty 3D 🐱</h1>
 <p>Take care of your cute little kitty!</p>
 </header>
 
 <div id="stats">
-❤️ Happiness: <span id="happy">100</span>
- | 🥛 Energy: <span id="energy">100</span>
- | 🪙 Coins: <span id="coins">100</span>
+ <div class="stat">❤️ <span id="happy">100</span></div>
+ <div class="stat">⚡ <span id="energy">100</span></div>
+ <div class="stat">🪙 <span id="coins">100</span></div>
+ <div class="stat">⭐ Level <span id="level">1</span></div>
 </div>
 
 <div id="game"></div>
 
-<div id="message">Hello! I am your cute kitty! 🐱</div>
+<div id="message">Hello! I am Brown Kitty! 🤎 Meow!</div>
 
-<div id="controls">
-<button onclick="bath()">🛁 Bath</button>
-<button onclick="dress()">👗 Dress</button>
+<div class="buttons">
+<button onclick="bath()">🛁 Take Bath</button>
+<button onclick="play()">🧶 Play</button>
 <button onclick="eat()">🍖 Eat Food</button>
 <button onclick="milk()">🥛 Drink Milk</button>
+<button onclick="dress()">👗 Dress Up</button>
+<button onclick="sleep()">😴 Sleep</button>
 <button onclick="shopping()">🛍️ Shopping</button>
 <button onclick="goHome()">🏠 Home</button>
 </div>
 
-<div id="shop">
-<h2>🛍️ Kitty Shopping Mall</h2>
-<p>Choose beautiful clothes for your kitty!</p>
-<button onclick="buy('pink')">💗 Pink Dress - 20</button>
-<button onclick="buy('blue')">💙 Blue Dress - 30</button>
-<button onclick="buy('yellow')">💛 Yellow Dress - 40</button>
-<button onclick="goHome()">🏠 Go Home</button>
+<div id="mall">
+<h2>🛍️ Kitty Fashion Shop</h2>
+<button onclick="buy(0xff75ae,20)">💗 Pink Dress 20</button>
+<button onclick="buy(0x5d9dff,30)">💙 Blue Dress 30</button>
+<button onclick="buy(0xffd65a,40)">💛 Yellow Dress 40</button>
+<button onclick="buy(0x9a68dc,50)">💜 Purple Dress 50</button>
 </div>
+
+<p class="small">Brown Kitty 3D Virtual Pet Game</p>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-let happy=100,energy=100,coins=100;
-let level=1, outfit=0, currentRoom='home';
-let cat,tail,arms=[];
-let scene,camera,renderer;
-let clock=new THREE.Clock();
+let scene,camera,renderer,clock;
+let cat,tail,dress,ball,bathtub,water;
+let bubbles=[];
+let happy=100,energy=100,coins=100,level=1;
+let currentRoom='home';
+let isBathing=false;
+let isPlaying=false;
+let isSleeping=false;
+let actionUntil=0;
+let outfitColor=0xff75ae;
+let hasDress=false;
+let bathStart=0;
+let bathObjects=[];
+let lastAction='';
 
-const colors={
- pink:0xff75ae,
- blue:0x5d9dff,
- yellow:0xffd65a
-};
+const $=id=>document.getElementById(id);
+
+function message(t){$('message').textContent=t}
 
 function update(){
- document.getElementById('happy').textContent=happy;
- document.getElementById('energy').textContent=energy;
- document.getElementById('coins').textContent=coins;
+ $('happy').textContent=happy;
+ $('energy').textContent=energy;
+ $('coins').textContent=coins;
+ $('level').textContent=level;
 }
 
-function say(t){
- document.getElementById('message').textContent=t;
+function mat(color,roughness=.8){
+ return new THREE.MeshStandardMaterial({color,roughness});
 }
 
 function sphere(parent,x,y,z,sx,sy,sz,color){
  let m=new THREE.Mesh(
- new THREE.SphereGeometry(1,32,24),
- new THREE.MeshStandardMaterial({color,roughness:.75})
+  new THREE.SphereGeometry(1,32,24),
+  mat(color)
  );
  m.position.set(x,y,z);
  m.scale.set(sx,sy,sz);
@@ -111,10 +150,20 @@ function sphere(parent,x,y,z,sx,sy,sz,color){
  return m;
 }
 
+function box(parent,x,y,z,sx,sy,sz,color){
+ let m=new THREE.Mesh(
+  new THREE.BoxGeometry(sx,sy,sz),
+  mat(color)
+ );
+ m.position.set(x,y,z);
+ parent.add(m);
+ return m;
+}
+
 function cylinder(parent,x,y,z,r1,r2,h,color){
  let m=new THREE.Mesh(
- new THREE.CylinderGeometry(r1,r2,h,24),
- new THREE.MeshStandardMaterial({color})
+  new THREE.CylinderGeometry(r1,r2,h,32),
+  mat(color)
  );
  m.position.set(x,y,z);
  parent.add(m);
@@ -125,219 +174,360 @@ function createCat(){
  cat=new THREE.Group();
  scene.add(cat);
 
- // Body
- sphere(cat,0,0.85,0,.66,.72,.46,0xffe4d5);
+ // Brown furry body
+ sphere(cat,0,.85,0,.62,.7,.45,0x98552e);
 
  // Head
- sphere(cat,0,1.8,0,.67,.62,.57,0xffe4d5);
+ sphere(cat,0,1.8,0,.68,.63,.57,0xb97848);
 
  // Ears
- let e1=sphere(cat,-.43,2.28,0,.20,.34,.15,0xffc3d2);
- let e2=sphere(cat,.43,2.28,0,.20,.34,.15,0xffc3d2);
- e1.rotation.z=.3;e2.rotation.z=-.3;
-
- // Inner ears
- sphere(cat,-.43,2.3,.11,.11,.22,.04,0xff759d);
- sphere(cat,.43,2.3,.11,.11,.22,.04,0xff759d);
-
- // Eyes
- sphere(cat,-.24,1.91,.49,.075,.11,.055,0x34243d);
- sphere(cat,.24,1.91,.49,.075,.11,.055,0x34243d);
-
- // Nose
- sphere(cat,0,1.72,.54,.09,.06,.07,0xff789a);
-
- // Cheeks
- sphere(cat,-.40,1.73,.48,.14,.09,.05,0xffb7bd);
- sphere(cat,.40,1.73,.48,.14,.09,.05,0xffb7bd);
-
- // Mouth
- let mouth=new THREE.Mesh(
- new THREE.TorusGeometry(.10,.018,8,20,Math.PI),
- new THREE.MeshStandardMaterial({color:0x633d50})
- );
- mouth.position.set(0,1.64,.55);
- mouth.rotation.z=Math.PI;
- cat.add(mouth);
-
- // Legs
- for(let x of [-.4,.4]){
-  sphere(cat,x,.25,0,.17,.36,.18,0xffe4d5);
+ for(let x of [-.45,.45]){
+  let ear=sphere(cat,x,2.28,0,.21,.34,.15,0x98552e);
+  sphere(cat,x,2.3,.11,.11,.22,.04,0xffa2a7);
  }
 
- // Tail
- tail=sphere(cat,0,.9,-.57,.13,.13,.48,0xffd4c4);
- tail.rotation.x=1.2;
+ // Face
+ sphere(cat,-.24,1.92,.5,.075,.105,.05,0x241b18);
+ sphere(cat,.24,1.92,.5,.075,.105,.05,0x241b18);
+ sphere(cat,-.26,1.95,.545,.025,.03,.02,0xffffff);
+ sphere(cat,.22,1.95,.545,.025,.03,.02,0xffffff);
+ sphere(cat,0,1.72,.56,.09,.06,.07,0xff8d99);
 
- // Dress
- let dress=sphere(cat,0,.85,.03,.68,.52,.48,0xff75ae);
- dress.name='dress';
-
- // Dress initially hidden
- dress.visible=false;
- cat.userData.dress=dress;
+ // Muzzle
+ sphere(cat,-.10,1.67,.53,.13,.09,.09,0xffd3bc);
+ sphere(cat,.10,1.67,.53,.13,.09,.09,0xffd3bc);
 
  // Whiskers
  for(let side of [-1,1]){
-  for(let i=0;i<2;i++){
-   let line=new THREE.Mesh(
-    new THREE.BoxGeometry(.32,.012,.012),
-    new THREE.MeshStandardMaterial({color:0x777777})
-   );
-   line.position.set(side*.52,1.72-i*.08,.5);
-   line.rotation.z=side*.15;
-   cat.add(line);
+  for(let i=0;i<3;i++){
+   let w=box(cat,side*.52,1.7-i*.07,.53,.30,.012,.012,0x5d3928);
+   w.rotation.z=side*.1;
   }
+ }
+
+ // Legs
+ for(let x of [-.38,.38]){
+  sphere(cat,x,.27,.05,.17,.35,.19,0x98552e);
+ }
+
+ // Tail
+ tail=sphere(cat,0,.95,-.53,.13,.14,.52,0x98552e);
+ tail.rotation.x=1.2;
+
+ // Clothes
+ dress=sphere(cat,0,.85,.02,.64,.49,.46,outfitColor);
+ dress.visible=false;
+
+ // Bow
+ sphere(cat,0,2.35,.08,.13,.08,.09,0xff75ae);
+
+ cat.userData.legs=[];
+ for(let x of [-.38,.38]){
+  let leg=sphere(cat,x,.27,.05,.17,.35,.19,0x98552e);
+  cat.userData.legs.push(leg);
  }
 }
 
-function makeRoom(){
- scene.background=new THREE.Color(
- currentRoom==='home'?0x9bdfff:0xffc4e1
+function floor(color){
+ let f=new THREE.Mesh(
+  new THREE.PlaneGeometry(30,30),
+  mat(color)
  );
+ f.rotation.x=-Math.PI/2;
+ f.position.y=-.12;
+ scene.add(f);
+}
 
- let floor=sphere(scene,0,-100,0,1,1,1,0xffffff);
- floor.visible=false;
-
- let ground=new THREE.Mesh(
- new THREE.PlaneGeometry(30,30),
- new THREE.MeshStandardMaterial({
-  color:currentRoom==='home'?0x9ce6a0:0xf7a8cf
- })
- );
- ground.rotation.x=-Math.PI/2;
- ground.position.y=-.15;
- scene.add(ground);
-
- // Home furniture or mall decorations
+function decoration(){
  if(currentRoom==='home'){
-  let table=sphere(scene,-3,.1,-2,1.2,.12,.7,0xffb77c);
-  let sofa=sphere(scene,3,.4,-2,1.2,.55,.6,0xff8da9);
+  floor(0x9bdc86);
+
+  // House
+  box(scene,0,1.7,-4,9,3.5,.3,0xffd7b8);
+  box(scene,0,3.5,-4,9,.2,.3,0xffa4a4);
+
+  // Window
+  box(scene,-2,1.8,-3.78,1.4,1.2,.06,0x8ee2ff);
+
+  // Sofa
+  box(scene,-2,.4,-1.5,1.8,.6,.7,0xf6a0b8);
+  box(scene,-2,.85,-1.8,1.8,.4,.3,0xffb8cc);
+
+  // Carpet
+  let carpet=sphere(scene,0,.015,0,2.6,.02,1.4,0xffe3a5);
+ }else if(currentRoom==='bath'){
+  floor(0x9edff5);
+
+  box(scene,0,1.6,-4,9,3.2,.3,0xc4f3ff);
+
+  // Bath tub
+  bathtub=new THREE.Group();
+  scene.add(bathtub);
+
+  let tub=box(bathtub,0,.3,0,2.8,.6,1.8,0xffffff);
+  box(bathtub,0,.55,.75,2.8,.3,.3,0xe4faff);
+  box(bathtub,0,.55,-.75,2.8,.3,.3,0xe4faff);
+  box(bathtub,-1.25,.55,0,.3,.3,1.5,0xe4faff);
+  box(bathtub,1.25,.55,0,.3,.3,1.5,0xe4faff);
+
+  water=sphere(bathtub,0,.53,0,1.2,.12,.65,0x52cbed);
+  water.material.transparent=true;
+  water.material.opacity=.7;
  }else{
+  floor(0xf7c2df);
+  box(scene,0,1.6,-4,9,3.2,.3,0xffe5f3);
   for(let i=-2;i<=2;i++){
-   let shelf=sphere(scene,i*1.5,.8,-3,.55,.9,.3,0xffd65a);
+   box(scene,i*1.3,.8,-2,.8,1.5,.4,0xffd66c);
   }
  }
 }
 
-function init(){
- scene=new THREE.Scene();
- camera=new THREE.PerspectiveCamera(45,
- window.innerWidth/420,.1,100);
- camera.position.set(0,3.2,7);
- camera.lookAt(0,1.1,0);
-
- renderer=new THREE.WebGLRenderer({antialias:true});
- renderer.setSize(window.innerWidth,420);
- renderer.setPixelRatio(Math.min(devicePixelRatio,2));
- document.getElementById('game').appendChild(renderer.domElement);
-
- scene.add(new THREE.HemisphereLight(0xffffff,0x777777,2));
- let light=new THREE.DirectionalLight(0xffffff,2);
- light.position.set(3,6,5);
- scene.add(light);
-
- makeRoom();
- createCat();
-
- window.addEventListener('resize',()=>{
-  camera.aspect=window.innerWidth/420;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth,420);
- });
-
- animate();
-}
-
-function animate(){
- requestAnimationFrame(animate);
- let t=clock.getElapsedTime();
-
- if(cat){
-  cat.position.y=Math.sin(t*2)*.04;
-  cat.rotation.y=Math.sin(t*.7)*.12;
-  tail.rotation.x=1.2+Math.sin(t*3)*.3;
-  cat.scale.y=1+Math.sin(t*3)*.015;
- }
- renderer.render(scene,camera);
-}
-
-function bath(){
- say('🛁 Kitty is taking a lovely bath! Splash splash!');
- happy=Math.min(100,happy+10);
- energy=Math.max(0,energy-5);
- update();
-}
-
-function dress(){
- if(outfit===0){
-  outfit=1;
-  cat.userData.dress.visible=true;
-  cat.userData.dress.material.color.setHex(0xff75ae);
- }else{
-  outfit=0;
-  cat.userData.dress.visible=false;
- }
- say('👗 Your kitty looks so cute in her outfit!');
- happy=Math.min(100,happy+15);
- update();
-}
-
-function eat(){
- say('🍖 Yum yum! Kitty is eating delicious food!');
- energy=Math.min(100,energy+20);
- happy=Math.min(100,happy+5);
- update();
-}
-
-function milk(){
- say('🥛 Kitty is drinking fresh milk. Meow!');
- energy=Math.min(100,energy+15);
- happy=Math.min(100,happy+10);
- update();
-}
-
-function shopping(){
- currentRoom='mall';
- level=2;
- document.getElementById('shop').style.display='block';
- say('🛍️ Welcome to Kitty Shopping Mall! Choose a dress!');
- changeRoom();
-}
-
-function goHome(){
- currentRoom='home';
- level=1;
- document.getElementById('shop').style.display='none';
- say('🏠 Welcome home, kitty!');
- changeRoom();
-}
-
-function changeRoom(){
- // Remove old room objects but keep lights and cat
+function clearRoom(){
  let remove=[];
  scene.children.forEach(o=>{
   if(o!==cat && !(o instanceof THREE.Light)) remove.push(o);
  });
  remove.forEach(o=>scene.remove(o));
- makeRoom();
- scene.background.set(currentRoom==='home'?0x9bdfff:0xffc4e1);
- cat.position.set(0,0,0);
 }
 
-function buy(type){
- let cost=type==='pink'?20:type==='blue'?30:40;
+function changeRoom(room){
+ currentRoom=room;
+ clearRoom();
+ decoration();
+ cat.position.set(0,0,0);
+ cat.rotation.set(0,0,0);
+ cat.visible=true;
+}
+
+function init(){
+ scene=new THREE.Scene();
+ scene.background=new THREE.Color(0x9bdfff);
+
+ camera=new THREE.PerspectiveCamera(
+  45,window.innerWidth/390,.1,100
+ );
+ camera.position.set(0,3.3,8);
+ camera.lookAt(0,1,0);
+
+ renderer=new THREE.WebGLRenderer({antialias:true});
+ renderer.setSize(window.innerWidth,390);
+ renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+ renderer.shadowMap.enabled=true;
+ $('game').appendChild(renderer.domElement);
+
+ scene.add(new THREE.HemisphereLight(0xffffff,0x8b6b55,2));
+
+ let light=new THREE.DirectionalLight(0xffffff,2.5);
+ light.position.set(3,7,5);
+ scene.add(light);
+
+ clock=new THREE.Clock();
+
+ decoration();
+ createCat();
+ createBall();
+
+ window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/390;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,390);
+ });
+
+ animate();
+}
+
+function createBall(){
+ ball=sphere(scene,2,.2,0,.22,.22,.22,0xff4c90);
+}
+
+function createBubble(){
+ let b=sphere(scene,
+  (Math.random()-.5)*1.6,
+  .8+Math.random()*1.1,
+  (Math.random()-.5)*.8,
+  .08,.08,.08,0xffffff
+ );
+ b.material.transparent=true;
+ b.material.opacity=.8;
+ bubbles.push(b);
+}
+
+function bath(){
+ changeRoom('bath');
+ isBathing=true;
+ isPlaying=false;
+ isSleeping=false;
+ bathStart=clock.getElapsedTime();
+ bubbles=[];
+ bathObjects=[];
+
+ dress.visible=false;
+
+ cat.position.set(0,.35,0);
+ cat.scale.set(.85,.8,.85);
+
+ // Kitty enters bath
+ for(let i=0;i<15;i++)createBubble();
+
+ message('🛁 Kitty is taking a full bubble bath! Splash splash! 🤎');
+ happy=Math.min(100,happy+15);
+ update();
+}
+
+function play(){
+ changeRoom('home');
+ isBathing=false;
+ isPlaying=true;
+ isSleeping=false;
+ actionUntil=clock.getElapsedTime()+10;
+ ball.visible=true;
+ message('🧶 Kitty is playing with her favourite ball!');
+ happy=Math.min(100,happy+20);
+ energy=Math.max(0,energy-5);
+ update();
+}
+
+function eat(){
+ message('🍖 Yum yum! Brown Kitty is eating delicious food!');
+ happy=Math.min(100,happy+5);
+ energy=Math.min(100,energy+20);
+ update();
+}
+
+function milk(){
+ message('🥛 Kitty is drinking a big bowl of milk! Meow!');
+ energy=Math.min(100,energy+15);
+ happy=Math.min(100,happy+10);
+ update();
+}
+
+function dressUp(){
+ dress.visible=true;
+ dress.material.color.setHex(outfitColor);
+ hasDress=true;
+ message('👗 Brown Kitty looks so beautiful!');
+ happy=Math.min(100,happy+10);
+ update();
+}
+
+function dress(){
+ dressUp();
+}
+
+function sleep(){
+ isBathing=false;
+ isPlaying=false;
+ isSleeping=true;
+ message('😴 Kitty is sleeping... Sweet dreams!');
+ energy=Math.min(100,energy+25);
+ update();
+}
+
+function shopping(){
+ isBathing=false;
+ isPlaying=false;
+ isSleeping=false;
+ level=2;
+ update();
+ changeRoom('mall');
+ $('mall').style.display='block';
+ message('🛍️ Welcome to the Kitty Fashion Mall!');
+}
+
+function goHome(){
+ $('mall').style.display='none';
+ level=1;
+ isBathing=false;
+ isPlaying=false;
+ isSleeping=false;
+ cat.scale.set(1,1,1);
+ changeRoom('home');
+ update();
+ message('🏠 Welcome home! Meow!');
+}
+
+function buy(color,cost){
  if(coins<cost){
-  say('😿 Not enough coins! Play and earn more coins.');
+  message('😿 Not enough coins!');
   return;
  }
  coins-=cost;
- outfit=1;
- cat.userData.dress.visible=true;
- cat.userData.dress.material.color.setHex(colors[type]);
- happy=Math.min(100,happy+20);
- say('🎉 New dress purchased! Kitty looks beautiful!');
+ outfitColor=color;
+ dressUp();
  update();
+ message('🎁 New dress purchased! Kitty is happy!');
+}
+
+function animate(){
+ requestAnimationFrame(animate);
+
+ let t=clock.getElapsedTime();
+
+ if(cat){
+  if(isBathing){
+   let elapsed=t-bathStart;
+
+   // Bathing and splashing movement
+   cat.position.y=.35+Math.sin(t*5)*.06;
+   cat.rotation.x=Math.sin(t*3)*.12;
+   cat.rotation.z=Math.sin(t*4)*.08;
+
+   bubbles.forEach((b,i)=>{
+    b.position.y+=.008;
+    if(b.position.y>2.5)b.position.y=.65;
+   });
+
+   if(Math.floor(elapsed)%2===0 && elapsed<12){
+    // Bubble animation
+   }
+
+   if(elapsed>12){
+    isBathing=false;
+    cat.scale.set(1,1,1);
+    cat.rotation.set(0,0,0);
+    bubbles.forEach(b=>scene.remove(b));
+    bubbles=[];
+    changeRoom('home');
+    message('🤎 Kitty finished her bath! So clean and cute!');
+   }
+  }
+  else if(isPlaying){
+   cat.position.x=Math.sin(t*2.5)*1.5;
+   cat.position.y=Math.abs(Math.sin(t*5))*.35;
+   cat.rotation.y=Math.cos(t*2.5)*.6;
+
+   ball.position.x=Math.cos(t*2.5)*1.5;
+   ball.position.y=.2+Math.abs(Math.sin(t*5))*.4;
+
+   if(t>actionUntil){
+    isPlaying=false;
+    cat.position.set(0,0,0);
+    ball.position.set(2,.2,0);
+    message('😻 Kitty had so much fun playing!');
+   }
+  }
+  else if(isSleeping){
+   cat.position.y=-.1;
+   cat.rotation.z=.25;
+  }
+  else{
+   // Automatic walking and jumping
+   cat.position.x=Math.sin(t*.8)*1.3;
+   cat.position.y=Math.abs(Math.sin(t*2.5))*.13;
+   cat.rotation.y=Math.cos(t*.8)*.3;
+   cat.rotation.z=0;
+  }
+
+  if(!isSleeping && !isBathing){
+   tail.rotation.x=1.2+Math.sin(t*4)*.4;
+  }
+
+  if(dress.visible){
+   dress.position.set(cat.position.x,cat.position.y+.85,.02);
+  }
+ }
+
+ renderer.render(scene,camera);
 }
 
 init();
